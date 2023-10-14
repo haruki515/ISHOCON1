@@ -150,7 +150,7 @@ WHERE
 	p.id IN (?)
 ORDER BY
 	p.id ASC,
-	c.created_at DESC
+	c.id DESC
 SQL
     cmts = db.xquery(cmt_query, product_ids)
     c_h = {}
