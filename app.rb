@@ -65,9 +65,7 @@ class Ishocon1::WebApp < Sinatra::Base
     end
 
     def current_user
-      user = session[:user] || db.xquery('SELECT * FROM users WHERE id = ?', session[:user_id]).first
-      session[:user] = user if session[:user] == nil
-      return user
+      db.xquery('SELECT * FROM users WHERE id = ?', session[:user_id]).first
     end
 
     def update_last_login(user_id)
