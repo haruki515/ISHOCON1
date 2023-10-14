@@ -166,7 +166,7 @@ ORDER BY
 SQL
     cmts = db.xquery(cmt_query, product_ids)
     c_h = {}
-    cmts.map do | c | 
+    cmts.map do | c |
       key = c[:p_id].to_s
       c_h[key] ||= []
       c_h[key] << { id: c[:c_id], content: c[:c_content], user_name: c[:u_name] }
@@ -177,12 +177,23 @@ SQL
 
   get '/users/:user_id' do
     products_query = <<SQL
-SELECT p.id, p.name, p.description, p.image_path, p.price, h.created_at
-FROM histories as h
-LEFT OUTER JOIN products as p
-ON h.product_id = p.id
-WHERE h.user_id = ?
-ORDER BY h.id DESC
+SELECT
+    p.id,
+    p.name,
+    p.description,
+    p.image_path,
+    p.price,
+    h.created_at
+FROM
+    histories as h
+LEFT OUTER JOIN
+    products as p
+ON
+    h.product_id = p.id
+WHERE
+    h.user_id = ?
+ORDER BY
+    h.id DESC
 SQL
     products = db.xquery(products_query, params[:user_id])
 
