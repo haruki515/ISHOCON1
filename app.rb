@@ -50,6 +50,16 @@ class Ishocon1::WebApp < Sinatra::Base
       client
     end
 
+    def cache_users
+      return if dalli.get("user_1")
+
+      puts "start load cache_users"
+      db.xquery('SELECT * FROM users').each do | u |
+        dalli.set("user_#{u[:id]}", u)
+      end
+      puts "end load cache_users"
+    end
+
     def time_now_db
       Time.now - 9 * 60 * 60
     end
@@ -65,7 +75,7 @@ class Ishocon1::WebApp < Sinatra::Base
     end
 
     def current_user
-      db.xquery('SELECT * FROM users WHERE id = ?', session[:user_id]).first
+      dalli.get("user_#{session[:user_id]}")
     end
 
     def update_last_login(user_id)
@@ -196,6 +206,9 @@ SQL
     db.query('DELETE FROM products WHERE id > 10000')
     db.query('DELETE FROM comments WHERE id > 200000')
     db.query('DELETE FROM histories WHERE id > 500000')
+
+    cache_users
+
     "Finish"
   end
 end
