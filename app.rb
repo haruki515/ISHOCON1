@@ -176,7 +176,7 @@ SQL
 
     total_pay = 0
     products.each do |product|
-      total_pay += product[:price]
+      total_pay += product[:price] || 0
     end
 
     user = db.xquery('SELECT * FROM users WHERE id = ?', params[:user_id]).first
