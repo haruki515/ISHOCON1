@@ -60,6 +60,18 @@ class Ishocon1::WebApp < Sinatra::Base
       puts "end load cache_users"
     end
 
+    def cache_top_page_products
+      return if dalli.get("top_products_page_0")
+      puts "start load top_products_pages"
+      200.times do | page |
+        to = 10000 - (page * 50)
+        from = 10000 - (50 + page * 50) + 1
+        products = db.xquery("SELECT id, name, image_path, price, description FROM products WHERE id BETWEEN #{from} AND #{to} ORDER BY id DESC")
+        ah_p = products.map { |p| { id: p[:id], name: p[:name], image_path: p[:image_path], price: p[:price], description:p[:description] } }
+        dalli.set("top_products_page_#{page}", ah_p)
+      end
+    end
+
     def time_now_db
       Time.now - 9 * 60 * 60
     end
@@ -128,7 +140,8 @@ class Ishocon1::WebApp < Sinatra::Base
 
   get '/' do
     page = params[:page].to_i || 0
-    products = db.xquery("SELECT id, name, image_path, price, description FROM products ORDER BY id DESC LIMIT 50 OFFSET #{page * 50}")
+    #products = db.xquery("SELECT id, name, image_path, price, description FROM products ORDER BY id DESC LIMIT 50 OFFSET #{page * 50}")
+    products = dalli.get("top_products_page_#{page}")
     product_ids = products.map { |p| p[:id] }
     cmt_query = <<SQL
 SELECT
@@ -209,6 +222,7 @@ SQL
 
     cache_users
 
+    cache_top_page_products
     "Finish"
   end
 end
